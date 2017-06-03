@@ -1,8 +1,8 @@
 from sklearn.utils.testing import assert_equal
 
 
-from softdtw.path import gen_all_paths
-from softdtw.path import delannoy_num
+from sdtw.path import gen_all_paths
+from sdtw.path import delannoy_num
 
 
 def test_gen_all_paths():
