@@ -3,7 +3,22 @@
 soft-DTW
 =========
 
-Python implementation of soft-DTW [1].
+Python implementation of soft-DTW.
+
+What is it?
+-----------
+
+The celebrated dynamic time warping (DTW) [1] defines the discrepancy between two time series, 
+of possibly variable length, as their minimal alignment cost.
+Although the number of possible alignments is exponential in the length of the two time series,
+[1] showed that DTW can be computed in only quadractic time using dynamic programming.
+
+Soft-DTW [2] proposes to replace this minimum by a soft minimum. Like the original DTW, 
+soft-DTW can be computed in quadratic time using dynamic programming. However, the main
+advantage of soft-DTW stems from the fact that it is differentiable everywhere and that
+its gradient can also be computed in quadratic time. This enables to use soft-DTW
+as a loss function, between a ground-truth time series and a time series predicted by a neural
+network, trained end-to-end using backpropagation.
 
 Supported features
 ------------------
@@ -77,7 +92,11 @@ or, if `git` is unavailable, `download as a ZIP from GitHub <https://github.com/
 References
 ----------
 
-.. [1] Marco Cuturi, Mathieu Blondel.
+.. [1] Hiroaki Sakoe, Seibi Chiba.
+       *Dynamic programming algorithm optimization for spoken word recognition.*
+       In: IEEE Trans. on Acoustics, Speech, and Sig. Proc, 1978.
+
+.. [2] Marco Cuturi, Mathieu Blondel.
        *Soft-DTW: a Differentiable Loss Function for Time-Series.*
        In: Proc. of ICML 2017.
        [`PDF <https://arxiv.org/abs/1703.01541>`_]
