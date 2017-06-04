@@ -5,6 +5,18 @@ soft-DTW
 
 Python implementation of soft-DTW [1].
 
+Supported features
+------------------
+
+* soft-DTW (forward pass) and gradient (backward pass) computations, implemented in Cython for speed
+
+Planned features
+-----------------
+
+* barycenters (time series averaging)
+* Chainer function
+* PyTorch function
+
 Example
 --------
 
