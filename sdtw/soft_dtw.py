@@ -7,12 +7,14 @@ from .soft_dtw_fast import _soft_dtw
 from .soft_dtw_fast import _soft_dtw_grad
 
 
-class soft_DTW(object):
+class SoftDTW(object):
 
-    def __init__(self, gamma=1.0):
+    def __init__(self, D, gamma=1.0):
         """
         Parameters
         ----------
+        D: array, shape = [m, n] or distance object
+            Distance matrix between elements of two time series.
 
         gamma: float
             Regularization parameter.
@@ -23,52 +25,50 @@ class soft_DTW(object):
         self.R_: array, shape = [m + 2, n + 2]
             Accumulated cost matrix (stored after calling `compute`).
         """
+        if hasattr(D, "compute"):
+            self.D = D.compute()
+        else:
+            self.D = D
+
         self.gamma = gamma
 
-    def compute(self, D):
+    def compute(self):
         """
         Compute soft-DTW by dynamic programming.
-
-        Parameters
-        ----------
-        D: array, shape = [m, n]
-            Distance matrix between elements of both time series.
 
         Returns
         -------
         sdtw: float
             soft-DTW discrepancy.
         """
-        m, n = D.shape
+        m, n = self.D.shape
 
         # Allocate memory.
         # We need +2 because we use indices starting from 1
         # and to deal with edge cases in the backward recursion.
         self.R_ = np.zeros((m+2, n+2))
 
-        _soft_dtw(D, self.R_, gamma=self.gamma)
+        _soft_dtw(self.D, self.R_, gamma=self.gamma)
 
         return self.R_[m, n]
 
-    def grad(self, D):
+    def grad(self):
         """
         Compute gradient of soft-DTW w.r.t. D by dynamic programming.
-
-        Parameters
-        ----------
-        D: array, shape = [m, n]
-            Distance matrix between elements of both time series.
 
         Returns
         -------
         grad: array, shape = [m, n]
             Gradient w.r.t. D.
         """
-        m, n = D.shape
+        if not hasattr(self, "R_"):
+            raise ValueError("Needs to call compute() first.")
+
+        m, n = self.D.shape
 
         # Add an extra row and an extra column to D.
         # Needed to deal with edge cases in the recursion.
-        D = np.vstack((D, np.zeros(n)))
+        D = np.vstack((self.D, np.zeros(n)))
         D = np.hstack((D, np.zeros((m+1, 1))))
 
         # Allocate memory.

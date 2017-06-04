@@ -1,1 +1,1 @@
-from .soft_dtw import soft_DTW
+from .soft_dtw import SoftDTW
