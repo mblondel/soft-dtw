@@ -7,77 +7,75 @@ from .soft_dtw_fast import _soft_dtw
 from .soft_dtw_fast import _soft_dtw_grad
 
 
-def soft_dtw_from_dist(D, ret_R=False, gamma=1.0):
-    """
-    Compute soft-DTW by dynamic programming,
-    from a distance matrix.
+class soft_DTW(object):
 
-    Parameters
-    ----------
-    D: array, shape = [m, n]
-        Distance matrix between elements of both time series.
+    def __init__(self, gamma=1.0):
+        """
+        Parameters
+        ----------
 
-    ret_R: bool
-        Whether to return R (accumulated cost matrix) or not.
+        gamma: float
+            Regularization parameter.
+            Lower is less smoothed (closer to true DTW).
 
-    gamma: float
-        Regularization parameter (lower is less smoothed, i.e.,
-        closer to true DTW).
+        Attributes
+        ----------
+        self.R_: array, shape = [m + 2, n + 2]
+            Accumulated cost matrix (stored after calling `compute`).
+        """
+        self.gamma = gamma
 
-    Returns
-    -------
-    sdtw: float or array, shape=[m + 2, n + 2]
-        soft-DTW discrepancy if ret_R = false
-        accumulated cost matrix R if ret_R = true
-    """
-    m, n = D.shape
+    def compute(self, D):
+        """
+        Compute soft-DTW by dynamic programming.
 
-    # Allocate memory.
-    # We need +2 because we use indices starting from 1
-    # and to deal with edge cases in the backward recursion.
-    R = np.zeros((m+2, n+2))
+        Parameters
+        ----------
+        D: array, shape = [m, n]
+            Distance matrix between elements of both time series.
 
-    _soft_dtw(D, R, gamma=gamma)
+        Returns
+        -------
+        sdtw: float
+            soft-DTW discrepancy.
+        """
+        m, n = D.shape
 
-    if ret_R:
-        return R
-    else:
-        return R[m, n]
+        # Allocate memory.
+        # We need +2 because we use indices starting from 1
+        # and to deal with edge cases in the backward recursion.
+        self.R_ = np.zeros((m+2, n+2))
 
+        _soft_dtw(D, self.R_, gamma=self.gamma)
 
-def soft_dtw_from_dist_grad(D, R, gamma=1.0):
-    """
-    Compute gradient of soft-DTW w.r.t. D by dynamic programming.
+        return self.R_[m, n]
 
-    Parameters
-    ----------
-    D: array, shape = [m, n]
-        Distance matrix between elements of both time series.
+    def grad(self, D):
+        """
+        Compute gradient of soft-DTW w.r.t. D by dynamic programming.
 
-    R: array, shape = [m + 2, n + 2]
-        Accumulated cost matrix.
+        Parameters
+        ----------
+        D: array, shape = [m, n]
+            Distance matrix between elements of both time series.
 
-    gamma: float
-        Regularization parameter (lower is less smoothed, i.e.,
-        closer to true DTW).
+        Returns
+        -------
+        grad: array, shape = [m, n]
+            Gradient w.r.t. D.
+        """
+        m, n = D.shape
 
-    Returns
-    -------
-    grad: array, shape = [m, n]
-        Gradient w.r.t. D.
-    """
-    m, n = D.shape
+        # Add an extra row and an extra column to D.
+        # Needed to deal with edge cases in the recursion.
+        D = np.vstack((D, np.zeros(n)))
+        D = np.hstack((D, np.zeros((m+1, 1))))
 
-    # Add an extra row and an extra column to D.
-    # Needed to deal with edge cases in the recursion.
-    D = np.vstack((D, np.zeros(n)))
-    D = np.hstack((D, np.zeros((m+1, 1))))
+        # Allocate memory.
+        # We need +2 because we use indices starting from 1
+        # and to deal with edge cases in the recursion.
+        E = np.zeros((m+2, n+2))
 
-    # Allocate memory.
-    # We need +2 because we use indices starting from 1
-    # and to deal with edge cases in the recursion.
-    E = np.zeros((m+2, n+2))
+        _soft_dtw_grad(D, self.R_, E, gamma=self.gamma)
 
-    _soft_dtw_grad(D, R, E, gamma=gamma)
-
-    return E[1:-1, 1:-1]
+        return E[1:-1, 1:-1]
