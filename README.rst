@@ -18,6 +18,7 @@ Example
     # Time series 2: numpy array, shape = [n, d] where n = length and d = dim
     Y = ...
     
+    # D can also be an arbitrary distance matrix: numpy array, shape [m, n]
     D = SquaredEuclidean(X, Y)
     sdtw = SoftDTW(D, gamma=1.0)
     # soft-DTW discrepancy, approaches DTW as gamma -> 0
