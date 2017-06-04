@@ -1,10 +1,14 @@
 import numpy as np
 
+from scipy.optimize import approx_fprime
+
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.utils.testing import assert_almost_equal
+from sklearn.utils.testing import assert_array_almost_equal
 
 from sdtw.path import gen_all_paths
 from sdtw import soft_dtw_from_dist
+from sdtw import soft_dtw_from_dist_grad
 
 # Generate two inputs randomly.
 rng = np.random.RandomState(0)
@@ -32,3 +36,17 @@ def test_soft_dtw():
     for gamma in (0.001, 0.01, 0.1, 1, 10, 100, 1000):
         assert_almost_equal(soft_dtw_from_dist(D, gamma=gamma),
                             _soft_dtw_bf(D, gamma=gamma))
+
+def test_soft_dtw_grad():
+    def make_func(gamma):
+        def func(d):
+            D_ = d.reshape(*D.shape)
+            return soft_dtw_from_dist(D_, gamma=gamma).ravel()
+        return func
+
+    for gamma in (0.001, 0.01, 0.1, 1, 10, 100, 1000):
+        R = soft_dtw_from_dist(D, ret_R=True, gamma=gamma)
+        E = soft_dtw_from_dist_grad(D, R, gamma=gamma)
+        func = make_func(gamma)
+        E_num = approx_fprime(D.ravel(), func, 1e-6).reshape(*E.shape)
+        assert_array_almost_equal(E, E_num, 5)

@@ -62,3 +62,40 @@ def _soft_dtw(np.ndarray[double, ndim=2] D,
                                               R[i-1, j-1],
                                               R[i, j-1],
                                               gamma)
+
+
+def _soft_dtw_grad(np.ndarray[double, ndim=2] D,
+                   np.ndarray[double, ndim=2] R,
+                   np.ndarray[double, ndim=2] E,
+                   double gamma):
+
+    # We added an extra row and an extra column on the Python side.
+    cdef int m = D.shape[0] - 1
+    cdef int n = D.shape[1] - 1
+
+    cdef int i, j
+    cdef double a, b, c
+
+    # Initialization.
+    memset(<void*>E.data, 0, (m+2) * (n+2) * sizeof(double))
+
+    for i in range(1, m+1):
+        # For D, indices start from 0 throughout.
+        D[i-1, n] = 0
+        R[i, n+1] = -DBL_MAX
+
+    for j in range(1, n+1):
+        D[m, j-1] = 0
+        R[m+1, j] = -DBL_MAX
+
+    E[m+1, n+1] = 1
+    R[m+1, n+1] = R[m, n]
+    D[m, n] = 0
+
+    # DP recursion.
+    for j in reversed(range(1, n+1)):  # ranges from n to 1
+        for i in reversed(range(1, m+1)):  # ranges from m to 1
+            a = exp((R[i+1, j] - R[i, j] - D[i, j-1]) / gamma)
+            b = exp((R[i, j+1] - R[i, j] - D[i-1, j]) / gamma)
+            c = exp((R[i+1, j+1] - R[i, j] - D[i, j]) / gamma)
+            E[i, j] = E[i+1, j] * a + E[i, j+1] * b + E[i+1,j+1] * c
