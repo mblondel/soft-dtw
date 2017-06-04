@@ -8,27 +8,30 @@ Python implementation of soft-DTW.
 What is it?
 -----------
 
-The celebrated dynamic time warping (DTW) [1] defines the discrepancy between two time series, 
-of possibly variable length, as their minimal alignment cost.
-Although the number of possible alignments is exponential in the length of the two time series,
-[1] showed that DTW can be computed in only quadractic time using dynamic programming.
+The celebrated dynamic time warping (DTW) [1] defines the discrepancy between
+two time series, of possibly variable length, as their minimal alignment cost.
+Although the number of possible alignments is exponential in the length of the
+two time series, [1] showed that DTW can be computed in only quadractic time
+using dynamic programming.
 
-Soft-DTW [2] proposes to replace this minimum by a soft minimum. Like the original DTW, 
-soft-DTW can be computed in quadratic time using dynamic programming. However, the main
-advantage of soft-DTW stems from the fact that it is differentiable everywhere and that
-its gradient can also be computed in quadratic time. This enables to use soft-DTW
-as a loss function, between a ground-truth time series and a time series predicted by a neural
-network, trained end-to-end using backpropagation.
+Soft-DTW [2] proposes to replace this minimum by a soft minimum. Like the
+original DTW, soft-DTW can be computed in quadratic time using dynamic
+programming. However, the main advantage of soft-DTW stems from the fact that
+it is differentiable everywhere and that its gradient can also be computed in
+quadratic time. This enables to use soft-DTW for time series averaging or as a
+loss function, between a ground-truth time series and a time series predicted
+by a neural network, trained end-to-end using backpropagation.
 
 Supported features
 ------------------
 
-* soft-DTW (forward pass) and gradient (backward pass) computations, implemented in Cython for speed
+* soft-DTW (forward pass) and gradient (backward pass) computations,
+  implemented in Cython for speed
+* barycenters (time series averaging)
 
 Planned features
 -----------------
 
-* barycenters (time series averaging)
 * Chainer function
 * PyTorch function
 
