@@ -88,6 +88,7 @@ or, if `git` is unavailable, `download as a ZIP from GitHub <https://github.com/
 3. Build and install soft-dtw::
 
     cd soft-dtw
+    make cython
     python setup.py build
     sudo python setup.py install
 
