@@ -2,6 +2,7 @@ import numpy as np
 
 from sklearn.metrics.pairwise import euclidean_distances
 
+from .soft_dtw_fast import _jacobian_product_sq_euc
 
 class SquaredEuclidean(object):
 
@@ -45,15 +46,8 @@ class SquaredEuclidean(object):
             Product with Jacobian
             ([m x d, m x n] * [m x n] = [m x d]).
         """
-        m = self.X.shape[0]
-        n = self.Y.shape[0]
-        d = self.X.shape[1]
-
         G = np.zeros_like(self.X)
 
-        for i in range(m):
-            for j in range(n):
-                for k in range(d):
-                    G[i, k] += E[i,j] * 2 * (self.X[i, k] - self.Y[j, k])
+        _jacobian_product_sq_euc(self.X, self.Y, E, G)
 
         return G

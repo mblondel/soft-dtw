@@ -99,3 +99,17 @@ def _soft_dtw_grad(np.ndarray[double, ndim=2] D,
             b = exp((R[i, j+1] - R[i, j] - D[i-1, j]) / gamma)
             c = exp((R[i+1, j+1] - R[i, j] - D[i, j]) / gamma)
             E[i, j] = E[i+1, j] * a + E[i, j+1] * b + E[i+1,j+1] * c
+
+
+def _jacobian_product_sq_euc(np.ndarray[double, ndim=2] X,
+                             np.ndarray[double, ndim=2] Y,
+                             np.ndarray[double, ndim=2] E,
+                             np.ndarray[double, ndim=2] G):
+    cdef int m = X.shape[0]
+    cdef int n = Y.shape[0]
+    cdef int d = X.shape[1]
+
+    for i in range(m):
+        for j in range(n):
+            for k in range(d):
+                G[i, k] += E[i,j] * 2 * (X[i, k] - Y[j, k])
