@@ -28,6 +28,7 @@ Supported features
 * soft-DTW (forward pass) and gradient (backward pass) computations,
   implemented in Cython for speed
 * barycenters (time series averaging)
+* dataset loader for the `UCR archive <http://www.cs.ucr.edu/~eamonn/time_series_data/>`_
 
 Planned features
 -----------------
