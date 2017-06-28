@@ -16,8 +16,8 @@ class SquaredEuclidean(object):
         Y: array, shape = [n, d]
             Second time series.
         """
-        self.X = X
-        self.Y = Y
+        self.X = X.astype(np.float64)
+        self.Y = Y.astype(np.float64)
 
     def compute(self):
         """

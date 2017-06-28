@@ -30,6 +30,8 @@ class SoftDTW(object):
         else:
             self.D = D
 
+        self.D = self.D.astype(np.float64)
+
         self.gamma = gamma
 
     def compute(self):
@@ -46,7 +48,7 @@ class SoftDTW(object):
         # Allocate memory.
         # We need +2 because we use indices starting from 1
         # and to deal with edge cases in the backward recursion.
-        self.R_ = np.zeros((m+2, n+2))
+        self.R_ = np.zeros((m+2, n+2), dtype=np.float64)
 
         _soft_dtw(self.D, self.R_, gamma=self.gamma)
 
