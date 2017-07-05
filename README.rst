@@ -54,7 +54,7 @@ Example
     sdtw = SoftDTW(D, gamma=1.0)
     # soft-DTW discrepancy, approaches DTW as gamma -> 0
     value = sdtw.compute()
-    # gradient w.r.t. D, shape = [m, n]
+    # gradient w.r.t. D, shape = [m, n], which is also the expected alignment matrix
     E = sdtw.grad()
     # gradient w.r.t. X, shape = [m, d]
     G = D.jacobian_product(E)
