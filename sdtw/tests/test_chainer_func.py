@@ -25,4 +25,4 @@ def test_grad():
     rng = np.random.RandomState(0)
     X = rng.randn(10, 2)
     Z = rng.randn(8, 2)
-    print check_grad(_func, _grad, Z.ravel(), X)
+    print(check_grad(_func, _grad, Z.ravel(), X))

@@ -10,11 +10,11 @@ ucr_dir = os.path.join(data_dir, "UCR_TS_Archive_2015")
 def _parse_ucr(filename):
     y = []
     X = []
-    for line in file(filename):
+    for line in open(filename):
         line = line.strip()
         arr = line.split(",")
         label = int(arr[0])
-        feat = map(float, arr[1:])
+        feat = list(map(float, arr[1:]))
         feat = np.array(feat).reshape(-1, 1)
         y.append(label)
         X.append(feat)

@@ -54,7 +54,7 @@ def sdtw_barycenter(X, barycenter_init, gamma=1.0, weights=None,
 
         obj = 0
 
-        for i in xrange(len(X)):
+        for i in range(len(X)):
             D = SquaredEuclidean(Z, X[i])
             sdtw = SoftDTW(D, gamma=gamma)
             value = sdtw.compute()
