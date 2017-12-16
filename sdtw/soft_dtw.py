@@ -46,9 +46,9 @@ class SoftDTW(object):
         m, n = self.D.shape
 
         # Allocate memory.
-        # We need +2 because we use indices starting from 1
+        # We need +1 because we use indices starting from 1
         # and to deal with edge cases in the backward recursion.
-        self.R_ = np.zeros((m+2, n+2), dtype=np.float64)
+        self.R_ = np.zeros((m+1, n+1), dtype=np.float64)
 
         _soft_dtw(self.D, self.R_, gamma=self.gamma)
 
