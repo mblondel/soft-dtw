@@ -36,7 +36,8 @@ cdef inline double _softmin3(double a,
 
 def _soft_dtw(np.ndarray[double, ndim=2] D,
               np.ndarray[double, ndim=2] R,
-              double gamma):
+              double gamma,
+              int sakoe_chiba_band=-1):
 
     cdef int m = D.shape[0]
     cdef int n = D.shape[1]
@@ -57,17 +58,25 @@ def _soft_dtw(np.ndarray[double, ndim=2] D,
     # DP recursion.
     for i in range(1, m + 1):
         for j in range(1, n + 1):
-            # D is indexed starting from 0.
-            R[i, j] = D[i-1, j-1] + _softmin3(R[i-1, j],
-                                              R[i-1, j-1],
-                                              R[i, j-1],
-                                              gamma)
+
+            # restrict the wrapping to a band around the diagonal
+            is_in_band = (j >= i - sakoe_chiba_band and
+                          j <= i + sakoe_chiba_band)
+            if sakoe_chiba_band >= 0 and not is_in_band:
+                R[i, j] = DBL_MAX
+            else:
+                # D is indexed starting from 0.
+                R[i, j] = D[i-1, j-1] + _softmin3(R[i-1, j],
+                                                  R[i-1, j-1],
+                                                  R[i, j-1],
+                                                  gamma)
 
 
 def _soft_dtw_grad(np.ndarray[double, ndim=2] D,
                    np.ndarray[double, ndim=2] R,
                    np.ndarray[double, ndim=2] E,
-                   double gamma):
+                   double gamma,
+                   int sakoe_chiba_band=-1):
 
     # We added an extra row and an extra column on the Python side.
     cdef int m = D.shape[0] - 1
@@ -95,21 +104,51 @@ def _soft_dtw_grad(np.ndarray[double, ndim=2] D,
     # DP recursion.
     for j in reversed(range(1, n+1)):  # ranges from n to 1
         for i in reversed(range(1, m+1)):  # ranges from m to 1
-            a = exp((R[i+1, j] - R[i, j] - D[i, j-1]) / gamma)
-            b = exp((R[i, j+1] - R[i, j] - D[i-1, j]) / gamma)
-            c = exp((R[i+1, j+1] - R[i, j] - D[i, j]) / gamma)
-            E[i, j] = E[i+1, j] * a + E[i, j+1] * b + E[i+1,j+1] * c
+
+            # restrict the wrapping to a band around the diagonal
+            is_in_band = (i >= j - sakoe_chiba_band and
+                          i <= j + sakoe_chiba_band)
+            if sakoe_chiba_band >= 0 and not is_in_band:
+                E[i, j] = 0
+                R[i, j] = -DBL_MAX
+            else:
+                if E[i+1, j] == 0:
+                    a = 0
+                else:
+                    a = exp((R[i+1, j] - R[i, j] - D[i, j-1]) / gamma)
+
+                if E[i, j+1] == 0:
+                    b = 0
+                else:
+                    b = exp((R[i, j+1] - R[i, j] - D[i-1, j]) / gamma)
+
+                if E[i+1,j+1] == 0:
+                    c = 0
+                else:
+                    c = exp((R[i+1, j+1] - R[i, j] - D[i, j]) / gamma)
+
+                E[i, j] = E[i+1, j] * a + E[i, j+1] * b + E[i+1,j+1] * c
 
 
 def _jacobian_product_sq_euc(np.ndarray[double, ndim=2] X,
                              np.ndarray[double, ndim=2] Y,
                              np.ndarray[double, ndim=2] E,
-                             np.ndarray[double, ndim=2] G):
+                             np.ndarray[double, ndim=2] G,
+                             int sakoe_chiba_band=-1):
     cdef int m = X.shape[0]
     cdef int n = Y.shape[0]
     cdef int d = X.shape[1]
+    cdef int i, j, k
+    cdef int is_in_band
 
     for i in range(m):
         for j in range(n):
+
+            # restrict the wrapping to a band around the diagonal
+            is_in_band = (j >= i - sakoe_chiba_band and
+                          j <= i + sakoe_chiba_band)
+            if sakoe_chiba_band >= 0 and not is_in_band:
+                continue
+
             for k in range(d):
                 G[i, k] += E[i,j] * 2 * (X[i, k] - Y[j, k])
