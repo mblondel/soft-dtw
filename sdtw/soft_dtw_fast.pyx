@@ -34,6 +34,22 @@ cdef inline double _softmin3(double a,
     return -gamma * (log(tmp) + max_val)
 
 
+cdef inline int is_outside_sakoe_chiba_band(int sakoe_chiba_band,
+                                            int i,
+                                            int j):
+    """True if the Sakoe-Chiba band constraint is used, and if (i, j) is outside
+
+    This constraints the wrapping to a band around the diagonal.
+    """
+
+    if sakoe_chiba_band < 0:
+        return 0
+    else:
+        is_in_band = (j >= i - sakoe_chiba_band and
+                      j <= i + sakoe_chiba_band)
+        return not is_in_band
+
+
 def _soft_dtw(np.ndarray[double, ndim=2] D,
               np.ndarray[double, ndim=2] R,
               double gamma,
@@ -59,10 +75,7 @@ def _soft_dtw(np.ndarray[double, ndim=2] D,
     for i in range(1, m + 1):
         for j in range(1, n + 1):
 
-            # restrict the wrapping to a band around the diagonal
-            is_in_band = (j >= i - sakoe_chiba_band and
-                          j <= i + sakoe_chiba_band)
-            if sakoe_chiba_band >= 0 and not is_in_band:
+            if is_outside_sakoe_chiba_band(sakoe_chiba_band, i, j):
                 R[i, j] = DBL_MAX
             else:
                 # D is indexed starting from 0.
@@ -105,10 +118,7 @@ def _soft_dtw_grad(np.ndarray[double, ndim=2] D,
     for j in reversed(range(1, n+1)):  # ranges from n to 1
         for i in reversed(range(1, m+1)):  # ranges from m to 1
 
-            # restrict the wrapping to a band around the diagonal
-            is_in_band = (i >= j - sakoe_chiba_band and
-                          i <= j + sakoe_chiba_band)
-            if sakoe_chiba_band >= 0 and not is_in_band:
+            if is_outside_sakoe_chiba_band(sakoe_chiba_band, i, j):
                 E[i, j] = 0
                 R[i, j] = -DBL_MAX
             else:
@@ -133,22 +143,16 @@ def _soft_dtw_grad(np.ndarray[double, ndim=2] D,
 def _jacobian_product_sq_euc(np.ndarray[double, ndim=2] X,
                              np.ndarray[double, ndim=2] Y,
                              np.ndarray[double, ndim=2] E,
-                             np.ndarray[double, ndim=2] G,
-                             int sakoe_chiba_band=-1):
+                             np.ndarray[double, ndim=2] G):
     cdef int m = X.shape[0]
     cdef int n = Y.shape[0]
     cdef int d = X.shape[1]
     cdef int i, j, k
-    cdef int is_in_band
 
     for i in range(m):
         for j in range(n):
 
-            # restrict the wrapping to a band around the diagonal
-            is_in_band = (j >= i - sakoe_chiba_band and
-                          j <= i + sakoe_chiba_band)
-            if sakoe_chiba_band >= 0 and not is_in_band:
+            if E[i,j] == 0:
                 continue
-
             for k in range(d):
                 G[i, k] += E[i,j] * 2 * (X[i, k] - Y[j, k])

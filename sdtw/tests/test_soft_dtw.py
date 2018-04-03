@@ -110,18 +110,22 @@ def test_soft_dtw_grad_band():
             assert_array_almost_equal(E, E_num, 5)
 
 
+def _path_is_in_band(A, sakoe_chiba_band):
+    if sakoe_chiba_band < 0:
+        return True
+    A_in_band = np.tril(A, sakoe_chiba_band)
+    A_in_band = np.tril(A_in_band.T, sakoe_chiba_band).T
+    return np.all(A == A_in_band)
+
+
+def _soft_dtw_band_bf(Ds, gamma, sakoe_chiba_band):
+    costs = [np.sum(A * Ds) for A in gen_all_paths(Ds.shape[0], Ds.shape[1])
+             if _path_is_in_band(A, sakoe_chiba_band)]
+    return _softmin(costs, gamma)
+
+
 def test_soft_dtw_band():
-    # a band of 0 means the DTW is restricted on the diagonal
-    dist = SoftDTW(Ds, gamma=1, sakoe_chiba_band=0).compute()
-    assert_array_almost_equal(dist, Ds.trace())
-
-    # increasing the band should reduce the dist
-    for sakoe_chiba_band in range(1, Ds.shape[0] // 2):
-        new_dist = SoftDTW(Ds, gamma=1, sakoe_chiba_band=1).compute()
-        assert dist >= new_dist
-        dist = new_dist
-
-    # having the max band should be indentical to no band at all
-    ref = SoftDTW(Ds, gamma=1, sakoe_chiba_band=-1).compute()
-    dist = SoftDTW(Ds, gamma=1, sakoe_chiba_band=Ds.shape[0] // 2).compute()
-    assert_array_almost_equal(dist, ref)
+    gamma = 0.01
+    for sakoe_chiba_band in [-1, 0, 1, 2]:
+        assert_almost_equal(SoftDTW(Ds, gamma, sakoe_chiba_band).compute(),
+                            _soft_dtw_band_bf(Ds, gamma, sakoe_chiba_band))

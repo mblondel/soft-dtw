@@ -31,7 +31,7 @@ class SquaredEuclidean(object):
         """
         return euclidean_distances(self.X, self.Y, squared=True)
 
-    def jacobian_product(self, E, sakoe_chiba_band=-1):
+    def jacobian_product(self, E):
         """
         Compute the product between the Jacobian
         (a linear map from m x d to m x n) and a matrix E.
@@ -41,11 +41,6 @@ class SquaredEuclidean(object):
         E: array, shape = [m, n]
             Second time series.
 
-        sakoe_chiba_band: int
-            If non-negative, the Jacobian product is restricted to a
-            Sakoe-Chiba band around the diagonal, in E.
-            The band has a width of 2 * sakoe_chiba_band + 1.
-
         Returns
         -------
         G: array, shape = [m, d]
@@ -54,10 +49,6 @@ class SquaredEuclidean(object):
         """
         G = np.zeros_like(self.X)
 
-        if sakoe_chiba_band >= 0:
-            assert E.shape[0] == E.shape[1]
-
-        _jacobian_product_sq_euc(self.X, self.Y, E, G,
-                                 sakoe_chiba_band=sakoe_chiba_band)
+        _jacobian_product_sq_euc(self.X, self.Y, E, G)
 
         return G
