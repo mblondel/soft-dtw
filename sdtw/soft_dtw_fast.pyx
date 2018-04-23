@@ -36,17 +36,26 @@ cdef inline double _softmin3(double a,
 
 cdef inline int is_outside_sakoe_chiba_band(int sakoe_chiba_band,
                                             int i,
-                                            int j):
+                                            int j,
+                                            int m,
+                                            int n):
     """True if the Sakoe-Chiba band constraint is used, and if (i, j) is outside
 
     This constraints the wrapping to a band around the diagonal.
     """
+    cdef int diff, bound
 
     if sakoe_chiba_band < 0:
         return 0
     else:
-        is_in_band = (j >= i - sakoe_chiba_band and
-                      j <= i + sakoe_chiba_band)
+        # since (i, j) starts at (1, 1)
+        i, j = i - 1, j - 1
+
+        diff = i * (n - 1) - j * (m - 1)
+        diff = abs(diff * 2)
+        bound = max(m, n) * (sakoe_chiba_band + 1)
+        is_in_band = diff < bound
+
         return not is_in_band
 
 
@@ -75,7 +84,7 @@ def _soft_dtw(np.ndarray[double, ndim=2] D,
     for i in range(1, m + 1):
         for j in range(1, n + 1):
 
-            if is_outside_sakoe_chiba_band(sakoe_chiba_band, i, j):
+            if is_outside_sakoe_chiba_band(sakoe_chiba_band, i, j, m, n):
                 R[i, j] = DBL_MAX
             else:
                 # D is indexed starting from 0.
@@ -118,7 +127,7 @@ def _soft_dtw_grad(np.ndarray[double, ndim=2] D,
     for j in reversed(range(1, n+1)):  # ranges from n to 1
         for i in reversed(range(1, m+1)):  # ranges from m to 1
 
-            if is_outside_sakoe_chiba_band(sakoe_chiba_band, i, j):
+            if is_outside_sakoe_chiba_band(sakoe_chiba_band, i, j, m, n):
                 E[i, j] = 0
                 R[i, j] = -DBL_MAX
             else:

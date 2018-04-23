@@ -39,9 +39,6 @@ class SoftDTW(object):
         self.gamma = gamma
         self.sakoe_chiba_band = sakoe_chiba_band
 
-        if sakoe_chiba_band >= 0:
-            assert self.D.shape[0] == self.D.shape[1]
-
     def compute(self):
         """
         Compute soft-DTW by dynamic programming.
