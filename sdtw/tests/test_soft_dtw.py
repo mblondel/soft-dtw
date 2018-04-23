@@ -102,9 +102,6 @@ def _path_is_in_band(A, sakoe_chiba_band):
     mask = ii * (nn - 1) - jj * (mm - 1)
     mask = np.abs(2 * mask) < (max(mm, nn) * (sakoe_chiba_band + 1))
 
-    if np.all(A[~mask] == 0):
-        print(A)
-
     return np.all(A[~mask] == 0)
 
 
