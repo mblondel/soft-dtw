@@ -1,11 +1,10 @@
 from __future__ import print_function
-import os.path
+import os
 import sys
+from codecs import open
 
-from Cython.Build import cythonize
-import setuptools
-from setuptools.extension import Extension
-from setuptools import setup
+from distutils.core import setup, Extension
+from Cython.Distutils import build_ext
 
 try:
     import numpy
@@ -16,7 +15,8 @@ except ImportError:
 
 DISTNAME = 'soft-dtw'
 DESCRIPTION = "Python implementation of soft-DTW"
-LONG_DESCRIPTION = open('README.rst').read()
+with open('README.rst', 'r', encoding='utf-8') as rm_file:
+    LONG_DESCRIPTION = rm_file.read()
 MAINTAINER = 'Mathieu Blondel'
 MAINTAINER_EMAIL = ''
 URL = 'https://github.com/mblondel/soft-dtw/'
@@ -24,46 +24,34 @@ LICENSE = 'Simplified BSD'
 DOWNLOAD_URL = 'https://github.com/mblondel/soft-dtw/'
 VERSION = '0.1.dev0'
 
-
-def configuration(parent_package='', top_path=None):
-    from numpy.distutils.misc_util import Configuration
-
-    config = Configuration(None, parent_package, top_path)
-
-    config.add_subpackage('sdtw')
-
-    return config
-
+extensions = [
+    Extension(
+        'sdtw.soft_dtw_fast',
+        sources=['sdtw/soft_dtw_fast.pyx'],
+        include_dirs=[numpy.get_include()],
+    ),
+]
 
 if __name__ == '__main__':
-    old_path = os.getcwd()
-    local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
 
-    os.chdir(local_path)
-    sys.path.insert(0, local_path)
-
-    extensions = [
-        Extension(
-            'sdtw.soft_dtw_fast',
-            ['sdtw/soft_dtw_fast.pyx'],
-            include_dirs=[numpy.get_include()],
-            library_dirs=[],
-        ),
-    ]
-
-    setup(configuration=configuration,
+    setup(
           name=DISTNAME,
           maintainer=MAINTAINER,
-          ext_modules=extensions,
-          include_package_data=True,
+          packages=['sdtw'],
           maintainer_email=MAINTAINER_EMAIL,
           description=DESCRIPTION,
           license=LICENSE,
           url=URL,
-          install_requires=['scipy', 'numpy', 'cython', 'scikit-learn'],
+          ext_modules=extensions,
+          install_requires=[
+              'scipy', 'numpy', 'cython', 'scikit-learn', 'chainer'
+          ],
+          setup_requires=['numpy', 'cython'],
           version=VERSION,
+          include_dirs=[numpy.get_include()],
           download_url=DOWNLOAD_URL,
           long_description=LONG_DESCRIPTION,
+          cmdclass={'build_ext': build_ext},
           zip_safe=False,  # the package can run out of an .egg file
           classifiers=[
               'Intended Audience :: Science/Research',

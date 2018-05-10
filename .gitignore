@@ -23,6 +23,7 @@ var/
 wheels/
 *.egg-info/
 .installed.cfg
+.pytest_cache
 *.egg
 *.c
 ## Ignore Ansible retry files
