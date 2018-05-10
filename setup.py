@@ -1,9 +1,11 @@
 from __future__ import print_function
 import os.path
 import sys
-import setuptools
-from numpy.distutils.core import setup
 
+from Cython.Build import cythonize
+import setuptools
+from setuptools.extension import Extension
+from setuptools import setup
 
 try:
     import numpy
@@ -40,14 +42,25 @@ if __name__ == '__main__':
     os.chdir(local_path)
     sys.path.insert(0, local_path)
 
+    extensions = [
+        Extension(
+            'sdtw.soft_dtw_fast',
+            ['sdtw/soft_dtw_fast.pyx'],
+            include_dirs=[numpy.get_include()],
+            library_dirs=[],
+        ),
+    ]
+
     setup(configuration=configuration,
           name=DISTNAME,
           maintainer=MAINTAINER,
+          ext_modules=extensions,
           include_package_data=True,
           maintainer_email=MAINTAINER_EMAIL,
           description=DESCRIPTION,
           license=LICENSE,
           url=URL,
+          install_requires=['scipy', 'numpy', 'cython', 'scikit-learn'],
           version=VERSION,
           download_url=DOWNLOAD_URL,
           long_description=LONG_DESCRIPTION,
