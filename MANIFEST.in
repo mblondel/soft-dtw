@@ -1,0 +1,6 @@
+include README.rst
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
+recursive-include sdtw/* docs *.rst conf.py Makefile make.bat *.h *.pyx *.pxd *.pxi *.py *.txt
