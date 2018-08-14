@@ -29,9 +29,7 @@ Supported features
   implemented in Cython for speed
 * barycenters (time series averaging)
 * dataset loader for the `UCR archive <http://www.cs.ucr.edu/~eamonn/time_series_data/>`_
-* `Chainer <http://chainer.org>`_ function
-
-For a PyTorch implementation, see `this project <https://github.com/arthurmensch/didyprog>`_.
+* `Chainer <http://chainer.org>`_ function (for PyTorch, see `this project <https://github.com/arthurmensch/didyprog>`_)
 
 Example
 --------
