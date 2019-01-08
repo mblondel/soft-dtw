@@ -4,6 +4,7 @@ from sklearn.metrics.pairwise import euclidean_distances
 
 from .soft_dtw_fast import _jacobian_product_sq_euc
 
+
 class SquaredEuclidean(object):
 
     def __init__(self, X, Y):
